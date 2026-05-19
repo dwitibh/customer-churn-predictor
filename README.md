@@ -4,7 +4,7 @@
 
 > Trains five classifiers on a 1,000 row customer churn dataset, picks logistic regression as the final model for interpretability, and ports the trained coefficients to a single file HTML app that scores customers live and explains every prediction.
 
-[**▶ Try the live predictor**](https://dwitibh.github.io/Machine-learning/) · [Open the notebook](Churn_project.ipynb)
+[**▶ Try the live predictor**](https://dwitibh.github.io/customer-churn-predictor/) · [Open the notebook](Churn_project.ipynb)
 
 ![Live demo: slider moves churn risk from 98% to single digits](screenshots/demo.gif)
 
@@ -119,7 +119,7 @@ Each prediction shows:
 - **Top 3 feature drivers** for that specific customer, computed as `wᵢ · (xᵢ − μᵢ) / σᵢ`. Positive contributions push churn up, negative pull it down.
 - **Plain English verdict** tied to the risk band.
 
-Open `index.html` directly in a browser, or visit the [GitHub Pages site](https://dwitibh.github.io/Machine-learning/) to interact with it.
+Open `index.html` directly in a browser, or visit the [GitHub Pages site](https://dwitibh.github.io/customer-churn-predictor/) to interact with it.
 
 ---
 
@@ -130,8 +130,8 @@ Just open [`index.html`](index.html) — no install required.
 
 ### Reproduce the notebook
 ```bash
-git clone https://github.com/dwitibh/Machine-learning.git
-cd Machine-learning
+git clone https://github.com/dwitibh/customer-churn-predictor.git
+cd customer-churn-predictor
 pip install pandas scikit-learn matplotlib jupyter joblib
 jupyter notebook Churn_project.ipynb
 ```
@@ -166,3 +166,4 @@ Production work in this space would add: class-imbalance handling (SMOTE, class 
 ---
 
 *Built by [Dwiti Bhavsar](https://www.linkedin.com/in/dwiti-bhavsar-1b955b38) · Senior Data Analyst · [Portfolio](https://dwitibh.github.io/)*
+
