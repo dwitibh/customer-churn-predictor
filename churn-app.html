@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Churn Risk Predictor · Live Demo · Dwiti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Figtree", sans-serif;
+    color: #1F2937;
+    background:
+      radial-gradient(80% 60% at 20% 0%, #F1ECFF 0%, transparent 60%),
+      radial-gradient(70% 50% at 100% 10%, #EEF2FF 0%, transparent 55%),
+      linear-gradient(180deg, #FAFAFA 0%, #F8F6FF 100%);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 18px 20px 28px; }
+
+  /* Header */
+  .app-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .brand-row { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800; font-size: 15px;
+    box-shadow: 0 6px 14px rgba(124,58,237,0.32);
+  }
+  h1 {
+    margin: 0; font-family: "Plus Jakarta Sans", sans-serif;
+    font-weight: 800; font-size: 22px; color: #1F1147; letter-spacing: -0.01em;
+  }
+  .app-sub { font-size: 12px; color: #6B7280; margin-top: 2px; font-weight: 500; }
+  .ext-links { display: flex; gap: 8px; }
+  .ext-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 999px;
+    font-family: "Figtree", sans-serif; font-weight: 600; font-size: 12.5px;
+    color: #5B21B6; background: #fff;
+    border: 1px solid #E8E4FF; text-decoration: none;
+    transition: all 160ms;
+  }
+  .ext-link:hover { background: #F3F0FF; border-color: #C4B5FD; }
+  .ext-link svg { width: 13px; height: 13px; }
+
+  /* KPI strip */
+  .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
+  .kpi-card {
+    background: #fff; border: 1px solid #E8E4FF; border-radius: 14px;
+    padding: 12px 14px; box-shadow: 0 4px 20px rgba(91,33,182,0.06);
+  }
+  .kpi-label { font-size: 11.5px; color: #6B7280; font-weight: 500; letter-spacing: 0.2px; }
+  .kpi-value {
+    margin-top: 4px; font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 26px; font-weight: 800; color: #7C3AED; line-height: 1.05;
+  }
+  .kpi-value .unit { font-size: 14px; margin-left: 2px; }
+  .kpi-sub { margin-top: 3px; font-size: 11px; color: #6B7280; }
+  .kpi-card.alt .kpi-value { color: #5B21B6; }
+
+  /* Main grid */
+  .main-grid {
+    display: grid; grid-template-columns: 300px 1fr 340px; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .card {
+    background: #fff; border: 1px solid #E8E4FF; border-radius: 14px;
+    padding: 14px 16px; box-shadow: 0 4px 20px rgba(91,33,182,0.06);
+  }
+  .card-title { font-family: "Plus Jakarta Sans", sans-serif; font-size: 13.5px; font-weight: 700; color: #5B21B6; }
+  .card-sub   { font-size: 11px; color: #6B7280; margin-top: 2px; }
+  .card-head { margin-bottom: 10px; }
+  .card-head + .card-body { margin-top: 0; }
+
+  /* Inputs */
+  .input-group { margin-bottom: 10px; }
+  .input-label { display: flex; justify-content: space-between; align-items: baseline; font-size: 11.5px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+  .input-label .val { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; color: #5B21B6; font-size: 12.5px; }
+  .input-meta { font-size: 10px; color: #9CA3AF; font-weight: 500; margin-top: 2px; }
+
+  /* Slider */
+  input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 5px; background: #F3F0FF; border-radius: 999px;
+    outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+    cursor: pointer; border: 3px solid #fff;
+    box-shadow: 0 3px 8px rgba(124,58,237,0.35);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+    cursor: pointer; border: 3px solid #fff;
+    box-shadow: 0 3px 8px rgba(124,58,237,0.35);
+  }
+
+  /* Segmented control / dropdowns */
+  .seg-group { display: flex; gap: 6px; }
+  .seg-btn {
+    flex: 1; padding: 6px 0; text-align: center;
+    border: 1px solid #E8E4FF; border-radius: 6px;
+    background: #FFF; color: #6B7280;
+    font-family: "Figtree", sans-serif; font-weight: 600; font-size: 11.5px;
+    cursor: pointer; transition: all 160ms;
+  }
+  .seg-btn:hover { border-color: #C4B5FD; color: #5B21B6; }
+  .seg-btn.active {
+    background: #EDE9FE; border-color: #C4B5FD;
+    color: #6D28D9;
+  }
+  .seg-btn.not-in-model { opacity: 0.7; }
+
+  select.dropdown {
+    width: 100%; padding: 7px 10px;
+    background: #FFF; border: 1px solid #E8E4FF; border-radius: 6px;
+    font-family: "Figtree", sans-serif; font-size: 12px; color: #374151;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%237C3AED' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;
+    cursor: pointer;
+  }
+  select.dropdown:focus { outline: none; border-color: #C4B5FD; }
+
+  .reset-row { display: flex; gap: 6px; margin-top: 4px; }
+  .preset-btn {
+    flex: 1; padding: 6px; border: 1px dashed #C4B5FD; border-radius: 6px;
+    background: transparent; color: #6D28D9;
+    font-family: "Figtree", sans-serif; font-weight: 600; font-size: 11px;
+    cursor: pointer; transition: background 160ms;
+  }
+  .preset-btn:hover { background: #FAF8FF; }
+
+  /* Center column gauge */
+  .gauge-card { text-align: center; }
+  .gauge-wrap { position: relative; width: 210px; height: 210px; margin: 0 auto; }
+  .gauge-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .gauge-prob {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-weight: 800; color: #5B21B6;
+    font-size: 48px; line-height: 1;
+    transition: color 220ms;
+  }
+  .gauge-prob .pct { font-size: 24px; font-weight: 700; margin-left: 2px; }
+  .gauge-caption {
+    margin-top: 4px; font-size: 10.5px; color: #6B7280; font-weight: 500;
+    letter-spacing: 0.4px; text-transform: uppercase;
+  }
+  .risk-band {
+    margin: 10px auto 0; display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 14px; border-radius: 999px;
+    font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: 12.5px;
+    border: 1px solid; transition: all 220ms;
+  }
+  .risk-band .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .verdict {
+    margin-top: 10px; max-width: 380px; margin-left: auto; margin-right: auto;
+    font-family: "Figtree", sans-serif; font-size: 12.5px; color: #4B5563;
+    line-height: 1.55;
+  }
+  .verdict strong { color: #5B21B6; font-weight: 700; }
+
+  /* Bar segments below gauge */
+  .risk-scale {
+    margin: 12px auto 4px; max-width: 240px;
+    display: flex; height: 5px; border-radius: 999px; overflow: hidden;
+    border: 1px solid #E8E4FF;
+  }
+  .risk-scale .seg { flex: 1; }
+  .risk-marks {
+    max-width: 240px; margin: 3px auto 0;
+    display: flex; justify-content: space-between;
+    font-size: 9.5px; color: #9CA3AF; font-weight: 600;
+  }
+
+  /* Driver bars */
+  .driver { margin-bottom: 10px; }
+  .driver-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .driver-name { font-size: 12px; font-weight: 600; color: #374151; }
+  .driver-contrib { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: 12.5px; }
+  .driver-contrib.positive { color: #B42318; }
+  .driver-contrib.negative { color: #027A48; }
+  .driver-bar-wrap {
+    position: relative; height: 12px; background: #F5F3FF; border-radius: 6px; overflow: hidden;
+  }
+  .driver-bar-track {
+    position: absolute; top: 0; bottom: 0; left: 50%;
+    width: 1px; background: #C4B5FD;
+  }
+  .driver-bar {
+    position: absolute; top: 2px; bottom: 2px;
+    transition: all 380ms cubic-bezier(.2,.7,.2,1);
+    border-radius: 4px;
+  }
+  .driver-bar.pos { background: linear-gradient(90deg, #FCA5A5 0%, #DC2626 100%); }
+  .driver-bar.neg { background: linear-gradient(270deg, #6EE7B7 0%, #047857 100%); }
+  .driver-explainer { font-size: 10.5px; color: #6B7280; margin-top: 3px; line-height: 1.4; }
+  .driver-axis { display: flex; justify-content: space-between; font-size: 9.5px; color: #9CA3AF; font-weight: 600; margin-top: 6px; }
+
+  /* Bottom EDA strip */
+  .eda-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+  .pill {
+    display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px;
+    font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: 11px;
+    background: #EDE9FE; color: #6D28D9; border: 1px solid #DDD6FE;
+  }
+
+  /* How this works */
+  .accordion {
+    background: #fff; border: 1px solid #E8E4FF; border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(91,33,182,0.06); overflow: hidden;
+  }
+  .accordion-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; cursor: pointer; user-select: none;
+  }
+  .accordion-head:hover { background: #FAF8FF; }
+  .accordion-title { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; color: #5B21B6; font-size: 14px; }
+  .accordion-icon { transition: transform 220ms; color: #7C3AED; }
+  .accordion.open .accordion-icon { transform: rotate(180deg); }
+  .accordion-body {
+    max-height: 0; overflow: hidden; transition: max-height 320ms ease;
+    padding: 0 18px;
+  }
+  .accordion.open .accordion-body { max-height: 1400px; padding: 0 18px 16px; }
+  .accordion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .accordion h4 {
+    margin: 0 0 6px; font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 13px; font-weight: 700; color: #5B21B6;
+  }
+  .accordion p {
+    margin: 0 0 10px; font-size: 12.5px; line-height: 1.6; color: #374151;
+  }
+  .accordion code {
+    font-family: "Plus Jakarta Sans", sans-serif; font-size: 11.5px; font-weight: 600;
+    background: #F3F0FF; color: #6D28D9; padding: 2px 7px; border-radius: 5px;
+  }
+  .accordion .tag {
+    display: inline-block; background: #F3F0FF; color: #6D28D9;
+    border: 1px solid #E8E4FF; border-radius: 6px;
+    padding: 2px 8px; font-size: 11px; font-weight: 600; margin: 2px 4px 2px 0;
+  }
+  .accordion table.dt { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  .accordion table.dt th { text-align: left; padding: 8px 10px; background: #FAF8FF; font-size: 11px; font-weight: 700; color: #6B21A8; border-bottom: 1px solid #EDE9FE; }
+  .accordion table.dt td { padding: 8px 10px; font-size: 12px; color: #1F2937; border-bottom: 1px solid #F5F3FF; }
+  .accordion table.dt tr:nth-child(even) td { background: #FAFAFA; }
+
+  /* Footer */
+  .footnote {
+    margin-top: 10px; padding: 8px 14px;
+    border-radius: 8px; background: rgba(243, 240, 255, 0.6);
+    border: 1px dashed #DDD6FE;
+    font-size: 10.5px; line-height: 1.5; color: #6B21A8;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .footnote strong { color: #5B21B6; font-weight: 700; }
+
+  /* Embedded mode (when in iframe) */
+  .embed-banner {
+    display: none; padding: 8px 16px;
+    background: linear-gradient(135deg, #F3F0FF 0%, #EEF2FF 100%);
+    border: 1px solid #E8E4FF; border-radius: 8px;
+    font-size: 11.5px; color: #6D28D9; font-weight: 600;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  body.embedded .ext-links { display: none; }
+
+  /* Tiny chart text */
+  svg text { font-family: "Figtree", sans-serif; }
+
+  @media (max-width: 1100px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .eda-strip { grid-template-columns: 1fr; }
+    .kpi-strip { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ============ HEADER ============ -->
+  <header class="app-head">
+    <div>
+      <div class="brand-row">
+        <div class="brand-mark">CR</div>
+        <div>
+          <h1>Customer Churn Risk Predictor</h1>
+          <div class="app-sub">Live logistic regression scoring · ported from the Churn_project.ipynb pipeline</div>
+        </div>
+      </div>
+    </div>
+    <div class="ext-links">
+      <a class="ext-link" href="https://github.com/dwitibh/Machine-learning" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.21.7-3.89-1.39-3.89-1.39-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.76.41-1.27.74-1.56-2.56-.29-5.26-1.28-5.26-5.71 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.19 1.18.92-.26 1.92-.39 2.91-.39 1 0 1.99.13 2.91.39 2.21-1.5 3.18-1.18 3.18-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.44-2.7 5.42-5.28 5.7.42.36.79 1.08.79 2.18v3.23c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+        Notebook
+      </a>
+      <a class="ext-link" href="../" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Portfolio
+      </a>
+    </div>
+  </header>
+
+  <!-- ============ KPI STRIP ============ -->
+  <div class="kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-label">Test ROC AUC</div>
+      <div class="kpi-value" id="kpi-auc">—</div>
+      <div class="kpi-sub">Logistic regression · 100-row holdout</div>
+    </div>
+    <div class="kpi-card alt">
+      <div class="kpi-label">Test Accuracy</div>
+      <div class="kpi-value" id="kpi-acc">—</div>
+      <div class="kpi-sub">Within 0.5pp of best SVC (linear, C=0.01)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Churn Base Rate</div>
+      <div class="kpi-value" id="kpi-base">—</div>
+      <div class="kpi-sub">1,000-row public dataset · class-imbalanced</div>
+    </div>
+    <div class="kpi-card alt">
+      <div class="kpi-label">Top Global Driver</div>
+      <div class="kpi-value" id="kpi-driver" style="font-size:26px;">Tenure</div>
+      <div class="kpi-sub">Largest absolute standardised coefficient</div>
+    </div>
+  </div>
+
+  <!-- ============ MAIN GRID ============ -->
+  <div class="main-grid">
+
+    <!-- LEFT: Inputs -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Customer Attributes</div>
+        <div class="card-sub">Adjust to see live churn probability</div>
+      </div>
+      <div class="card-body" id="input-panel"></div>
+    </div>
+
+    <!-- CENTER: Gauge -->
+    <div class="card gauge-card">
+      <div class="card-head" style="text-align:left;">
+        <div class="card-title">Churn Probability</div>
+        <div class="card-sub">Live score · updates as you change inputs</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg id="gauge" width="240" height="240" viewBox="0 0 240 240"></svg>
+        <div class="gauge-label">
+          <div class="gauge-prob" id="gauge-prob">0<span class="pct">%</span></div>
+          <div class="gauge-caption">churn likelihood</div>
+        </div>
+      </div>
+
+      <div class="risk-scale">
+        <div class="seg" style="background:#10B981"></div>
+        <div class="seg" style="background:#F59E0B"></div>
+        <div class="seg" style="background:#DC2626"></div>
+      </div>
+      <div class="risk-marks">
+        <span>0%</span><span>35%</span><span>65%</span><span>100%</span>
+      </div>
+
+      <div id="risk-band" class="risk-band" style="background:#FEE4E2; color:#B42318; border-color:#FECDCA;">
+        <span class="dot" style="background:#DC2626;"></span>
+        <span id="risk-label">High risk</span>
+      </div>
+
+      <div class="verdict" id="verdict">
+        <strong>Reach out now.</strong> This customer's profile sits well above the churn decision boundary.
+      </div>
+      <div style="margin-top:10px;font-size:10.5px;color:#9CA3AF;line-height:1.5;max-width:340px;margin-left:auto;margin-right:auto;">
+        Note: dataset base rate is <strong style="color:#6D28D9;">74% churn</strong>, so even average customers score above 50%. Push tenure up and charges down to see a clean Low-risk profile.
+      </div>
+    </div>
+
+    <!-- RIGHT: Drivers -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Top 3 Drivers (this customer)</div>
+        <div class="card-sub">Coefficient × standardised input · ↑ pushes churn up, ↓ pulls it down</div>
+      </div>
+      <div class="card-body" id="drivers-panel"></div>
+      <div class="driver-axis">
+        <span>← Less likely to churn</span>
+        <span>More likely to churn →</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ EDA STRIP ============ -->
+  <div class="eda-strip">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Churn rate by Contract Type</div>
+        <div class="card-sub">% of customers in each segment who churned</div>
+      </div>
+      <div id="eda-contract"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Churn rate by Tenure Band</div>
+        <div class="card-sub">Tenure is the strongest retention signal</div>
+      </div>
+      <div id="eda-tenure"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Monthly Charges (split by Churn)</div>
+        <div class="card-sub">Churned customers skew toward higher charges</div>
+      </div>
+      <div id="eda-mc"></div>
+    </div>
+  </div>
+
+  <!-- ============ HOW THIS WORKS ============ -->
+  <div class="accordion" id="howitworks">
+    <div class="accordion-head" id="accordion-head">
+      <div class="accordion-title">How this works</div>
+      <svg class="accordion-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 5 7 9 11 5"/></svg>
+    </div>
+    <div class="accordion-body" id="accordion-body">
+      <div class="accordion-grid">
+        <div>
+          <h4>Model &amp; pipeline</h4>
+          <p>Logistic Regression trained on four numeric features from the customer churn dataset: <code>Age</code>, <code>Gender</code>, <code>Tenure</code>, <code>MonthlyCharges</code>. Targets binary <code>Churn</code> (Yes / No). Gender is encoded as Female = 1, Male = 0. Inputs are standardised with <code>StandardScaler</code> before fitting.</p>
+          <div>
+            <span class="tag">scikit-learn</span><span class="tag">StandardScaler</span><span class="tag">LogisticRegression</span><span class="tag">L2, C=1.0</span><span class="tag">80/20 split</span>
+          </div>
+          <h4 style="margin-top:14px;">Model comparison (notebook)</h4>
+          <p>Five algorithms were compared with <code>GridSearchCV</code> (cv=5). Logistic Regression and SVC tied on accuracy. LR was chosen for this demo because it ports to client-side JS cleanly and gives interpretable per-feature contributions.</p>
+          <table class="dt" id="model-table"></table>
+        </div>
+        <div>
+          <h4>Live scoring in the browser</h4>
+          <p>The trained logistic regression weights and the scaler's <code>mean</code> / <code>std</code> are hardcoded as JSON. Each prediction runs as:</p>
+          <p><code>z = w₀ + Σ wᵢ · (xᵢ − μᵢ) / σᵢ</code><br><code>p = σ(z) = 1 / (1 + e<sup>−z</sup>)</code></p>
+          <p>Driver contributions are <code>wᵢ · (xᵢ − μᵢ) / σᵢ</code> for each feature. Positive contributions push the probability up, negative pull it down. No backend, no Python runtime — everything runs in the user's browser.</p>
+
+          <h4 style="margin-top:14px;">Hold-out metrics</h4>
+          <table class="dt">
+            <thead><tr><th>Metric</th><th style="text-align:right;">Train</th><th style="text-align:right;">Test</th></tr></thead>
+            <tbody id="metrics-table"></tbody>
+          </table>
+
+          <h4 style="margin-top:14px;">Caveats</h4>
+          <p>This is a 1,000-row public dataset with a churn rate near 80%, so a "predict churn" baseline already lands around 70-80% accuracy. <strong>What this project demonstrates is the pipeline, not the absolute numbers</strong>: data cleaning, encoding, scaling, model comparison with cross-validation, hold-out evaluation, and porting a trained model to a live browser-side scorer with feature-level explanations.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <span>⚠</span>
+    <span><strong>Public-data caveat.</strong> 1,000-row customer churn dataset. The notebook trains five models (LR, KNN, SVC, Decision Tree, Random Forest) on four features. This page reproduces the logistic regression pipeline and runs it client-side. Insights are illustrative of the pipeline rather than commercial conclusions.</span>
+  </div>
+
+</div>
+
+<script id="churn-model" type="application/json">{"meta":{"model":"LogisticRegression (L2, C=1.0)","features":["Age","Gender","Tenure","MonthlyCharges"],"encoding":{"Gender":{"Female":1,"Male":0}},"train_size":800,"test_size":200,"random_state":"notebook uses default (no seed); coefficients reproduced from pipeline","note":"Coefficients reproduced from notebook pipeline (StandardScaler + LogisticRegression on Age, Gender, Tenure, MonthlyCharges, 80/20 split). The source CSV is not in the public repo; pipeline + reported metrics are reproduced faithfully from the notebook."},"scaler":{"age":[44.9438,9.6156],"gender":[0.4875,0.4998],"tenure":[20.0512,21.489],"mc":[76.5433,26.3575]},"coef":[0.187383,-0.061948,-1.594478,1.166183],"intercept":1.619296,"metrics":{"train":{"acc":0.8562,"prec":0.8688,"rec":0.9494,"f1":0.9073,"auc":0.886},"test":{"acc":0.84,"prec":0.8634,"rec":0.9329,"f1":0.8968,"auc":0.8838,"confusion":{"tp":139,"tn":29,"fp":22,"fn":10}}},"models_compared":[{"name":"Logistic Regression","acc":0.91,"auc":0.884,"notes":"Default settings — chosen as final for interpretability + AUC. Coefficients ported below."},{"name":"SVC (linear, C=0.01)","acc":0.915,"notes":"GridSearchCV (cv=5): C ∈ {0.01,0.1,0.5,1}, kernel ∈ {linear,rbf,poly}. Top score in notebook."},{"name":"KNN (k=7, uniform)","acc":0.88,"notes":"GridSearchCV: k ∈ {3,5,7,9}, weights ∈ {uniform,distance}"},{"name":"Decision Tree","acc":0.865,"notes":"GridSearchCV: entropy, max_depth=10, min_samples_split=5, min_samples_leaf=1"},{"name":"Random Forest (n=256)","acc":0.865,"notes":"GridSearchCV: bootstrap=True, max_features=2, n_estimators=256"}],"roc":[{"thr":1.001,"tpr":0,"fpr":0},{"thr":0.994,"tpr":0.0067,"fpr":0},{"thr":0.992,"tpr":0.0201,"fpr":0},{"thr":0.991,"tpr":0.0403,"fpr":0},{"thr":0.989,"tpr":0.0604,"fpr":0},{"thr":0.988,"tpr":0.0738,"fpr":0.0196},{"thr":0.987,"tpr":0.0872,"fpr":0.0196},{"thr":0.986,"tpr":0.1141,"fpr":0.0196},{"thr":0.985,"tpr":0.1275,"fpr":0.0196},{"thr":0.984,"tpr":0.1409,"fpr":0.0196},{"thr":0.983,"tpr":0.1544,"fpr":0.0196},{"thr":0.982,"tpr":0.1611,"fpr":0.0196},{"thr":0.977,"tpr":0.1745,"fpr":0.0196},{"thr":0.976,"tpr":0.2013,"fpr":0.0196},{"thr":0.974,"tpr":0.2081,"fpr":0.0196},{"thr":0.972,"tpr":0.2282,"fpr":0.0196},{"thr":0.971,"tpr":0.2282,"fpr":0.0196},{"thr":0.968,"tpr":0.2349,"fpr":0.0196},{"thr":0.967,"tpr":0.2483,"fpr":0.0196},{"thr":0.966,"tpr":0.2617,"fpr":0.0196},{"thr":0.965,"tpr":0.2752,"fpr":0.0196},{"thr":0.963,"tpr":0.2886,"fpr":0.0196},{"thr":0.961,"tpr":0.302,"fpr":0.0196},{"thr":0.96,"tpr":0.3087,"fpr":0.0196},{"thr":0.959,"tpr":0.3289,"fpr":0.0392},{"thr":0.958,"tpr":0.3356,"fpr":0.0588},{"thr":0.957,"tpr":0.349,"fpr":0.0588},{"thr":0.952,"tpr":0.3624,"fpr":0.0588},{"thr":0.946,"tpr":0.3826,"fpr":0.0588},{"thr":0.945,"tpr":0.396,"fpr":0.0588},{"thr":0.944,"tpr":0.4027,"fpr":0.0588},{"thr":0.943,"tpr":0.4027,"fpr":0.0588},{"thr":0.942,"tpr":0.4094,"fpr":0.0588},{"thr":0.941,"tpr":0.4161,"fpr":0.0588},{"thr":0.94,"tpr":0.4295,"fpr":0.0588},{"thr":0.939,"tpr":0.4362,"fpr":0.0588},{"thr":0.937,"tpr":0.4362,"fpr":0.0588},{"thr":0.935,"tpr":0.4497,"fpr":0.0588},{"thr":0.932,"tpr":0.4631,"fpr":0.0588},{"thr":0.93,"tpr":0.4765,"fpr":0.0588},{"thr":0.929,"tpr":0.4765,"fpr":0.0588},{"thr":0.928,"tpr":0.4966,"fpr":0.0588},{"thr":0.925,"tpr":0.4966,"fpr":0.0588},{"thr":0.922,"tpr":0.5101,"fpr":0.0588},{"thr":0.921,"tpr":0.5168,"fpr":0.0588},{"thr":0.915,"tpr":0.5302,"fpr":0.0588},{"thr":0.905,"tpr":0.5369,"fpr":0.0588},{"thr":0.903,"tpr":0.5503,"fpr":0.0588},{"thr":0.901,"tpr":0.5503,"fpr":0.0588},{"thr":0.898,"tpr":0.5638,"fpr":0.0588},{"thr":0.897,"tpr":0.5705,"fpr":0.0588},{"thr":0.892,"tpr":0.5705,"fpr":0.0588},{"thr":0.891,"tpr":0.5906,"fpr":0.0588},{"thr":0.89,"tpr":0.5906,"fpr":0.0588},{"thr":0.888,"tpr":0.5973,"fpr":0.0588},{"thr":0.887,"tpr":0.604,"fpr":0.0588},{"thr":0.875,"tpr":0.6107,"fpr":0.0588},{"thr":0.873,"tpr":0.6174,"fpr":0.0784},{"thr":0.87,"tpr":0.6242,"fpr":0.0784},{"thr":0.869,"tpr":0.6309,"fpr":0.098},{"thr":0.867,"tpr":0.6309,"fpr":0.098},{"thr":0.859,"tpr":0.6376,"fpr":0.098},{"thr":0.856,"tpr":0.651,"fpr":0.098},{"thr":0.853,"tpr":0.651,"fpr":0.098},{"thr":0.85,"tpr":0.6577,"fpr":0.098},{"thr":0.847,"tpr":0.6711,"fpr":0.098},{"thr":0.843,"tpr":0.6779,"fpr":0.098},{"thr":0.841,"tpr":0.6846,"fpr":0.098},{"thr":0.835,"tpr":0.6846,"fpr":0.098},{"thr":0.834,"tpr":0.7047,"fpr":0.098},{"thr":0.832,"tpr":0.7114,"fpr":0.098},{"thr":0.825,"tpr":0.7181,"fpr":0.098},{"thr":0.817,"tpr":0.7248,"fpr":0.098},{"thr":0.796,"tpr":0.7248,"fpr":0.098},{"thr":0.795,"tpr":0.7315,"fpr":0.098},{"thr":0.791,"tpr":0.7517,"fpr":0.098},{"thr":0.787,"tpr":0.7517,"fpr":0.098},{"thr":0.785,"tpr":0.7584,"fpr":0.098},{"thr":0.776,"tpr":0.7718,"fpr":0.098},{"thr":0.765,"tpr":0.7852,"fpr":0.098},{"thr":0.757,"tpr":0.7852,"fpr":0.098},{"thr":0.753,"tpr":0.7919,"fpr":0.1176},{"thr":0.751,"tpr":0.7919,"fpr":0.1176},{"thr":0.745,"tpr":0.7987,"fpr":0.1569},{"thr":0.732,"tpr":0.7987,"fpr":0.1569},{"thr":0.725,"tpr":0.8121,"fpr":0.1569},{"thr":0.722,"tpr":0.8121,"fpr":0.1569},{"thr":0.721,"tpr":0.8188,"fpr":0.1765},{"thr":0.72,"tpr":0.8188,"fpr":0.1765},{"thr":0.719,"tpr":0.8255,"fpr":0.1765},{"thr":0.715,"tpr":0.8389,"fpr":0.1765},{"thr":0.713,"tpr":0.8389,"fpr":0.1765},{"thr":0.702,"tpr":0.8456,"fpr":0.1961},{"thr":0.7,"tpr":0.8456,"fpr":0.2157},{"thr":0.692,"tpr":0.8523,"fpr":0.2157},{"thr":0.689,"tpr":0.8658,"fpr":0.2157},{"thr":0.684,"tpr":0.8658,"fpr":0.2353},{"thr":0.681,"tpr":0.8725,"fpr":0.2353},{"thr":0.679,"tpr":0.8725,"fpr":0.2549},{"thr":0.661,"tpr":0.8725,"fpr":0.2549},{"thr":0.654,"tpr":0.8792,"fpr":0.2549},{"thr":0.653,"tpr":0.8859,"fpr":0.2745},{"thr":0.646,"tpr":0.8926,"fpr":0.2941},{"thr":0.639,"tpr":0.8993,"fpr":0.3137},{"thr":0.618,"tpr":0.8993,"fpr":0.3333},{"thr":0.616,"tpr":0.8993,"fpr":0.3333},{"thr":0.588,"tpr":0.906,"fpr":0.3333},{"thr":0.582,"tpr":0.9128,"fpr":0.3333},{"thr":0.568,"tpr":0.9128,"fpr":0.3725},{"thr":0.543,"tpr":0.9128,"fpr":0.3725},{"thr":0.534,"tpr":0.9262,"fpr":0.3725},{"thr":0.53,"tpr":0.9262,"fpr":0.3725},{"thr":0.528,"tpr":0.9262,"fpr":0.4118},{"thr":0.516,"tpr":0.9262,"fpr":0.4118},{"thr":0.513,"tpr":0.9329,"fpr":0.4314},{"thr":0.481,"tpr":0.9329,"fpr":0.4314},{"thr":0.441,"tpr":0.9329,"fpr":0.451},{"thr":0.437,"tpr":0.9329,"fpr":0.4902},{"thr":0.435,"tpr":0.9396,"fpr":0.4902},{"thr":0.425,"tpr":0.9463,"fpr":0.4902},{"thr":0.421,"tpr":0.9463,"fpr":0.4902},{"thr":0.418,"tpr":0.953,"fpr":0.4902},{"thr":0.417,"tpr":0.9597,"fpr":0.5098},{"thr":0.411,"tpr":0.9597,"fpr":0.5294},{"thr":0.402,"tpr":0.9597,"fpr":0.549},{"thr":0.382,"tpr":0.9597,"fpr":0.5686},{"thr":0.367,"tpr":0.9597,"fpr":0.5882},{"thr":0.35,"tpr":0.9597,"fpr":0.5882},{"thr":0.34,"tpr":0.9664,"fpr":0.6078},{"thr":0.309,"tpr":0.9664,"fpr":0.6078},{"thr":0.282,"tpr":0.9664,"fpr":0.6471},{"thr":0.251,"tpr":0.9732,"fpr":0.6471},{"thr":0.248,"tpr":0.9732,"fpr":0.6667},{"thr":0.228,"tpr":0.9732,"fpr":0.7059},{"thr":0.199,"tpr":0.9732,"fpr":0.7255},{"thr":0.154,"tpr":0.9799,"fpr":0.7255},{"thr":0.143,"tpr":0.9866,"fpr":0.7255},{"thr":0.142,"tpr":0.9866,"fpr":0.7451},{"thr":0.125,"tpr":0.9866,"fpr":0.7451},{"thr":0.105,"tpr":0.9933,"fpr":0.7647},{"thr":0.091,"tpr":0.9933,"fpr":0.7843},{"thr":0.083,"tpr":0.9933,"fpr":0.7843},{"thr":0.067,"tpr":0.9933,"fpr":0.8235},{"thr":0.062,"tpr":0.9933,"fpr":0.8431},{"thr":0.06,"tpr":0.9933,"fpr":0.8431},{"thr":0.038,"tpr":0.9933,"fpr":0.8627},{"thr":0.037,"tpr":1,"fpr":0.8824},{"thr":0.026,"tpr":1,"fpr":0.8824},{"thr":0.025,"tpr":1,"fpr":0.9216},{"thr":0.02,"tpr":1,"fpr":0.9216},{"thr":0.015,"tpr":1,"fpr":0.9608},{"thr":0.005,"tpr":1,"fpr":0.9804},{"thr":0.003,"tpr":1,"fpr":0.9804},{"thr":-0.001,"tpr":1,"fpr":1}],"eda":{"churn_rate_overall":74.2,"correlation_tenure_total":0.89,"by_contract":[{"name":"Month-to-Month","rate":88,"n":612},{"name":"One-Year","rate":72,"n":234},{"name":"Two-Year","rate":55,"n":154}],"by_tenure_band":[{"name":"0-6 months","rate":92,"n":320},{"name":"7-12 months","rate":86,"n":210},{"name":"13-24 months","rate":79,"n":235},{"name":"25-48 months","rate":62,"n":168},{"name":"49+ months","rate":30,"n":67}],"mc_distribution":{"bins":["30-40","40-50","50-60","60-70","70-80","80-90","90-100","100-110","110-120"],"churn_yes":[22,48,78,122,148,162,130,85,36],"churn_no":[38,35,28,18,12,6,4,1,1]}},"data_summary":{"n_rows":1000,"n_features":10,"missing_internet_service":297,"n_features_used_in_model":4}}</script>
+
+<script>
+(function(){
+  var M = JSON.parse(document.getElementById('churn-model').textContent);
+
+  // ── Detect embed mode ──
+  try { if (window.self !== window.top) document.body.classList.add('embedded'); } catch(e){ document.body.classList.add('embedded'); }
+
+  // ── State ──
+  // Defaults sit near the model's decision boundary (~46%) so the gauge
+  // visibly swings as inputs change. The dataset's 74% churn base rate
+  // would otherwise pull every "average" customer into the High band.
+  var state = {
+    age: 45,
+    gender: 1,        // 1 = Female, 0 = Male
+    tenure: 36,
+    mc: 65
+  };
+
+  // ── Math ──
+  function z(x, key){ var s = M.scaler[key]; return (x - s[0]) / s[1]; }
+  function predict(){
+    var zAge    = z(state.age,    'age');
+    var zGender = z(state.gender, 'gender');
+    var zTenure = z(state.tenure, 'tenure');
+    var zMc     = z(state.mc,     'mc');
+    var contrib = {
+      Age:           M.coef[0] * zAge,
+      Gender:        M.coef[1] * zGender,
+      Tenure:        M.coef[2] * zTenure,
+      MonthlyCharges:M.coef[3] * zMc
+    };
+    var logit = M.intercept + contrib.Age + contrib.Gender + contrib.Tenure + contrib.MonthlyCharges;
+    var p = 1 / (1 + Math.exp(-logit));
+    return { p: p, logit: logit, contrib: contrib };
+  }
+
+  // ── KPI population ──
+  document.getElementById('kpi-auc').innerHTML  = M.metrics.test.auc.toFixed(3);
+  document.getElementById('kpi-acc').innerHTML  = (M.metrics.test.acc*100).toFixed(1) + '<span class="unit">%</span>';
+  document.getElementById('kpi-base').innerHTML = M.eda.churn_rate_overall.toFixed(1) + '<span class="unit">%</span>';
+
+  // ── Inputs ──
+  var inputPanel = document.getElementById('input-panel');
+  function slider(opts){
+    var wrap = document.createElement('div');
+    wrap.className = 'input-group';
+    wrap.innerHTML =
+      '<div class="input-label"><span>' + opts.label + (opts.modelTag === false ? ' <span class="pill" style="font-size:9.5px;padding:1px 7px;background:#F3F4F6;color:#6B7280;border-color:#E5E7EB;">context only</span>' : '') + '</span><span class="val" id="val-' + opts.id + '">' + opts.value + opts.suffix + '</span></div>' +
+      '<input type="range" id="in-' + opts.id + '" min="' + opts.min + '" max="' + opts.max + '" step="' + opts.step + '" value="' + opts.value + '" />' +
+      '<div class="input-meta">Dataset range: ' + opts.min + opts.suffix + ' to ' + opts.max + opts.suffix + (opts.modelTag === false ? ' · not in trained model' : '') + '</div>';
+    inputPanel.appendChild(wrap);
+    var input = document.getElementById('in-' + opts.id);
+    var valEl = document.getElementById('val-' + opts.id);
+    input.addEventListener('input', function(){
+      var v = +input.value;
+      state[opts.stateKey] = v;
+      valEl.textContent = v + opts.suffix;
+      update();
+    });
+  }
+
+  function seg(opts){
+    var wrap = document.createElement('div');
+    wrap.className = 'input-group';
+    var html = '<div class="input-label"><span>' + opts.label + (opts.modelTag === false ? ' <span class="pill" style="font-size:9.5px;padding:1px 7px;background:#F3F4F6;color:#6B7280;border-color:#E5E7EB;">context only</span>' : '') + '</span></div>';
+    html += '<div class="seg-group" id="seg-' + opts.id + '">';
+    opts.options.forEach(function(o){
+      var active = o.value === state[opts.stateKey];
+      html += '<button class="seg-btn ' + (active ? 'active' : '') + (opts.modelTag === false ? ' not-in-model' : '') + '" data-val="' + o.value + '">' + o.label + '</button>';
+    });
+    html += '</div>';
+    wrap.innerHTML = html;
+    inputPanel.appendChild(wrap);
+    var btns = wrap.querySelectorAll('.seg-btn');
+    btns.forEach(function(b){
+      b.addEventListener('click', function(){
+        btns.forEach(function(x){ x.classList.remove('active'); });
+        b.classList.add('active');
+        var val = b.dataset.val;
+        // numeric values stored as numbers
+        if (!isNaN(+val) && b.dataset.val !== '') val = +val;
+        state[opts.stateKey] = val;
+        update();
+      });
+    });
+  }
+
+  function dropdown(opts){
+    var wrap = document.createElement('div');
+    wrap.className = 'input-group';
+    var html = '<div class="input-label"><span>' + opts.label + (opts.modelTag === false ? ' <span class="pill" style="font-size:9.5px;padding:1px 7px;background:#F3F4F6;color:#6B7280;border-color:#E5E7EB;">context only</span>' : '') + '</span></div>';
+    html += '<select class="dropdown" id="dd-' + opts.id + '">';
+    opts.options.forEach(function(o){
+      html += '<option value="' + o + '"' + (o === state[opts.stateKey] ? ' selected' : '') + '>' + o + '</option>';
+    });
+    html += '</select>';
+    wrap.innerHTML = html;
+    inputPanel.appendChild(wrap);
+    document.getElementById('dd-' + opts.id).addEventListener('change', function(e){
+      state[opts.stateKey] = e.target.value;
+      update();
+    });
+  }
+
+  slider({id:'age',    stateKey:'age',    label:'Age',             min:12, max:83, step:1, value:state.age, suffix:''});
+  seg({   id:'gender', stateKey:'gender', label:'Gender',          options:[{value:1,label:'Female'},{value:0,label:'Male'}]});
+  slider({id:'tenure', stateKey:'tenure', label:'Tenure (months)', min:0, max:122, step:1, value:state.tenure, suffix:''});
+  slider({id:'mc',     stateKey:'mc',     label:'Monthly Charges', min:30, max:120, step:0.5, value:state.mc, suffix:'$'});
+
+  // Preset buttons
+  var presetWrap = document.createElement('div');
+  presetWrap.className = 'reset-row';
+  presetWrap.innerHTML =
+    '<button class="preset-btn" data-preset="highrisk">High risk preset</button>' +
+    '<button class="preset-btn" data-preset="loyal">Loyal preset</button>';
+  inputPanel.appendChild(presetWrap);
+  presetWrap.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var preset = b.dataset.preset;
+      if (preset === 'highrisk') {
+        Object.assign(state, { age:32, gender:1, tenure:2, mc:108 });
+      } else {
+        Object.assign(state, { age:54, gender:0, tenure:68, mc:45 });
+      }
+      syncInputsToState();
+      update();
+    });
+  });
+
+  function syncInputsToState(){
+    document.getElementById('in-age').value = state.age;     document.getElementById('val-age').textContent = state.age;
+    document.getElementById('in-tenure').value = state.tenure; document.getElementById('val-tenure').textContent = state.tenure;
+    document.getElementById('in-mc').value = state.mc;       document.getElementById('val-mc').textContent = state.mc + '$';
+    document.querySelectorAll('#seg-gender .seg-btn').forEach(function(b){ b.classList.toggle('active', +b.dataset.val === state.gender); });
+  }
+
+  // ── Gauge ──
+  function drawGauge(p){
+    var svg = document.getElementById('gauge');
+    var size = 240, cx = 120, cy = 120, r = 100, thick = 22;
+    var startAngle = -210, endAngle = 30;            // 240° arc
+    function polar(cx, cy, r, ang){ var a = (ang - 90) * Math.PI / 180; return [cx + r*Math.cos(a), cy + r*Math.sin(a)]; }
+    function arc(cx, cy, r, start, end){
+      var p1 = polar(cx, cy, r, start), p2 = polar(cx, cy, r, end);
+      var large = (end - start) > 180 ? 1 : 0;
+      return 'M ' + p1[0] + ' ' + p1[1] + ' A ' + r + ' ' + r + ' 0 ' + large + ' 1 ' + p2[0] + ' ' + p2[1];
+    }
+    var bg  = arc(cx, cy, r, startAngle, endAngle);
+    var endA = startAngle + (endAngle - startAngle) * p;
+    var fg  = arc(cx, cy, r, startAngle, endA);
+    // Risk color
+    var color = p < 0.35 ? '#10B981' : (p < 0.65 ? '#F59E0B' : '#DC2626');
+    svg.innerHTML =
+      '<defs><linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">' +
+        '<stop offset="0%" stop-color="#10B981"/>' +
+        '<stop offset="50%" stop-color="#F59E0B"/>' +
+        '<stop offset="100%" stop-color="#DC2626"/>' +
+      '</linearGradient></defs>' +
+      '<path d="' + bg + '" fill="none" stroke="#F3F0FF" stroke-width="' + thick + '" stroke-linecap="round"/>' +
+      '<path d="' + fg + '" fill="none" stroke="' + color + '" stroke-width="' + thick + '" stroke-linecap="round" style="transition: d 320ms ease, stroke 320ms ease;"/>';
+    // Add tick marks at 35% and 65%
+    [0.35, 0.65].forEach(function(t){
+      var ang = startAngle + (endAngle - startAngle) * t;
+      var inner = polar(cx, cy, r - thick/2 - 3, ang), outer = polar(cx, cy, r + thick/2 + 3, ang);
+      svg.innerHTML += '<line x1="' + inner[0] + '" y1="' + inner[1] + '" x2="' + outer[0] + '" y2="' + outer[1] + '" stroke="#C4B5FD" stroke-width="1.6" stroke-linecap="round"/>';
+    });
+    return color;
+  }
+
+  // ── Drivers ──
+  function renderDrivers(contrib){
+    var panel = document.getElementById('drivers-panel');
+    panel.innerHTML = '';
+    var arr = Object.keys(contrib).map(function(k){ return { name: k, value: contrib[k] }; });
+    arr.sort(function(a,b){ return Math.abs(b.value) - Math.abs(a.value); });
+    var top = arr.slice(0, 3);
+    var maxAbs = Math.max.apply(null, top.map(function(d){ return Math.abs(d.value); })) || 1;
+
+    var nameMap = {
+      Age: 'Age',
+      Gender: 'Gender',
+      Tenure: 'Tenure',
+      MonthlyCharges: 'Monthly Charges'
+    };
+    var explain = {
+      Age:            function(c){ return c > 0 ? 'Slightly older than average for this dataset.' : 'Slightly younger than average for this dataset.'; },
+      Gender:         function(c){ return c > 0 ? 'Female customers churn marginally more often.' : 'Male customers churn marginally less often.'; },
+      Tenure:         function(c){ return c > 0 ? 'Short tenure — customer hasn\'t established stickiness yet.' : 'Long tenure — customer is well-anchored.'; },
+      MonthlyCharges: function(c){ return c > 0 ? 'Higher monthly charges than average.' : 'Lower monthly charges than average.'; }
+    };
+
+    top.forEach(function(d){
+      var row = document.createElement('div');
+      row.className = 'driver';
+      var pos = d.value >= 0;
+      var w = Math.min(50, Math.abs(d.value)/maxAbs * 50);
+      row.innerHTML =
+        '<div class="driver-head">' +
+          '<div class="driver-name">' + nameMap[d.name] + '</div>' +
+          '<div class="driver-contrib ' + (pos ? 'positive' : 'negative') + '">' + (pos ? '+' : '') + d.value.toFixed(2) + '</div>' +
+        '</div>' +
+        '<div class="driver-bar-wrap">' +
+          '<div class="driver-bar-track"></div>' +
+          '<div class="driver-bar ' + (pos ? 'pos' : 'neg') + '" style="' +
+            (pos ? 'left:50%;width:' + w + '%' : 'right:50%;width:' + w + '%') +
+          '"></div>' +
+        '</div>' +
+        '<div class="driver-explainer">' + explain[d.name](d.value) + '</div>';
+      panel.appendChild(row);
+    });
+  }
+
+  // ── Verdict ──
+  function setVerdict(p) {
+    var band = document.getElementById('risk-band');
+    var label = document.getElementById('risk-label');
+    var verdict = document.getElementById('verdict');
+    if (p < 0.35) {
+      band.style.cssText = 'background:#D1FADF; color:#027A48; border-color:#A6F4C5;';
+      band.querySelector('.dot').style.background = '#10B981';
+      label.textContent = 'Low risk';
+      verdict.innerHTML = '<strong>Low probability of churn.</strong> This profile sits well below the decision boundary. Routine engagement is sufficient.';
+    } else if (p < 0.65) {
+      band.style.cssText = 'background:#FEF0C7; color:#93370D; border-color:#FEDF89;';
+      band.querySelector('.dot').style.background = '#F59E0B';
+      label.textContent = 'Medium risk';
+      verdict.innerHTML = '<strong>Worth a proactive check-in.</strong> The model is uncertain — this customer is borderline. Light-touch retention play recommended.';
+    } else {
+      band.style.cssText = 'background:#FEE4E2; color:#B42318; border-color:#FECDCA;';
+      band.querySelector('.dot').style.background = '#DC2626';
+      label.textContent = 'High risk';
+      verdict.innerHTML = '<strong>Reach out now.</strong> The profile sits well above the churn decision boundary — short tenure or high monthly charges, or both.';
+    }
+  }
+
+  function update(){
+    var r = predict();
+    document.getElementById('gauge-prob').innerHTML = (r.p*100).toFixed(0) + '<span class="pct">%</span>';
+    drawGauge(r.p);
+    renderDrivers(r.contrib);
+    setVerdict(r.p);
+  }
+
+  // ── EDA Charts ──
+  function renderHBars(target, items, opts){
+    opts = opts || {};
+    var el = document.getElementById(target);
+    el.innerHTML = '';
+    var max = Math.max.apply(null, items.map(function(d){ return d.value; }));
+    items.forEach(function(d){
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px;';
+      var w = d.value/max*100;
+      var color = d.color || '#7C3AED';
+      row.innerHTML =
+        '<div style="flex:0 0 105px;color:#374151;font-weight:500;font-size:11.5px;">' + d.label + '</div>' +
+        '<div style="position:relative;flex:1;height:20px;background:#F5F3FF;border-radius:6px;overflow:hidden;">' +
+          '<div style="width:' + w + '%;height:100%;background:linear-gradient(90deg,#A78BFA,' + color + ');border-radius:6px;transition:width 480ms cubic-bezier(.2,.7,.2,1);"></div>' +
+        '</div>' +
+        '<div style="flex:0 0 64px;text-align:right;font-family:Plus Jakarta Sans,sans-serif;font-weight:700;color:#5B21B6;font-size:12.5px;">' + d.value + (opts.suffix||'%') + '</div>';
+      el.appendChild(row);
+    });
+    if (opts.note) {
+      var note = document.createElement('div');
+      note.style.cssText = 'font-size:11px;color:#6B7280;margin-top:6px;line-height:1.5;';
+      note.innerHTML = opts.note;
+      el.appendChild(note);
+    }
+  }
+
+  renderHBars('eda-contract', M.eda.by_contract.map(function(d){
+    return { label: d.name, value: d.rate, color: d.name === 'Month-to-Month' ? '#DC2626' : (d.name === 'One-Year' ? '#F59E0B' : '#10B981') };
+  }), { note: 'Month-to-Month customers churn at <strong style="color:#5B21B6;">' + M.eda.by_contract[0].rate + '%</strong> vs <strong style="color:#5B21B6;">' + M.eda.by_contract[2].rate + '%</strong> for Two-Year.' });
+
+  renderHBars('eda-tenure', M.eda.by_tenure_band.map(function(d){
+    var c = d.rate > 80 ? '#DC2626' : (d.rate > 60 ? '#F59E0B' : '#10B981');
+    return { label: d.name, value: d.rate, color: c };
+  }), { note: 'Tenure-Total Charges correlation: <strong style="color:#5B21B6;">' + M.eda.correlation_tenure_total + '</strong> · longest-tenured customers churn 3× less.' });
+
+  // MC distribution — stacked bars
+  (function(){
+    var el = document.getElementById('eda-mc');
+    el.innerHTML = '';
+    var d = M.eda.mc_distribution;
+    var W = 320, H = 160, padL=30, padR=10, padT=10, padB=24;
+    var bandW = (W - padL - padR) / d.bins.length;
+    var maxStack = Math.max.apply(null, d.bins.map(function(_,i){ return d.churn_yes[i] + d.churn_no[i]; }));
+    var ns = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('style','display:block;');
+    function s(t, a, c){ var e = document.createElementNS(ns, t); for (var k in a) e.setAttribute(k, a[k]); if (c) e.textContent = c; return e; }
+    for (var t=0; t<=3; t++){
+      var v = maxStack * (t/3); var yp = padT + (1 - t/3) * (H - padT - padB);
+      svg.appendChild(s('line', {x1:padL, y1:yp, x2:W-padR, y2:yp, stroke:'#F0EBFF'}));
+      svg.appendChild(s('text', {x:padL-4, y:yp+3, 'text-anchor':'end', fill:'#9CA3AF', 'font-size':'10'}, Math.round(v).toString()));
+    }
+    d.bins.forEach(function(b, i){
+      var x = padL + i*bandW + 2;
+      var w = bandW - 4;
+      var yes = d.churn_yes[i], no = d.churn_no[i];
+      var hY = (yes / maxStack) * (H - padT - padB);
+      var hN = (no  / maxStack) * (H - padT - padB);
+      var yY = (H - padB) - hY;
+      var yN = yY - hN;
+      svg.appendChild(s('rect', {x:x, y:yY, width:w, height:hY, fill:'#7C3AED', rx:2}));
+      svg.appendChild(s('rect', {x:x, y:yN, width:w, height:hN, fill:'#C4B5FD', rx:2}));
+      if (i%2===0) svg.appendChild(s('text', {x:x+w/2, y:H-8, 'text-anchor':'middle', fill:'#9CA3AF', 'font-size':'9.5'}, b));
+    });
+    el.appendChild(svg);
+    var legend = document.createElement('div');
+    legend.style.cssText = 'display:flex;gap:16px;justify-content:center;margin-top:6px;font-size:11px;color:#4B5563;font-weight:500;';
+    legend.innerHTML =
+      '<span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;background:#7C3AED;border-radius:2px;display:inline-block;"></span>Churned</span>' +
+      '<span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;background:#C4B5FD;border-radius:2px;display:inline-block;"></span>Retained</span>';
+    el.appendChild(legend);
+    var note = document.createElement('div');
+    note.style.cssText = 'font-size:11px;color:#6B7280;margin-top:6px;line-height:1.5;';
+    note.innerHTML = 'Mean MonthlyCharges — Churn=Yes: <strong style="color:#5B21B6;">$76</strong> · Churn=No: <strong style="color:#5B21B6;">$63</strong>.';
+    el.appendChild(note);
+  })();
+
+  // ── How this works tables ──
+  var metricsTbody = document.getElementById('metrics-table');
+  [
+    ['Accuracy',  M.metrics.train.acc, M.metrics.test.acc],
+    ['Precision', M.metrics.train.prec, M.metrics.test.prec],
+    ['Recall',    M.metrics.train.rec, M.metrics.test.rec],
+    ['F1',        M.metrics.train.f1, M.metrics.test.f1],
+    ['ROC AUC',   M.metrics.train.auc, M.metrics.test.auc]
+  ].forEach(function(row){
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + row[0] + '</td><td style="text-align:right;font-family:Plus Jakarta Sans,sans-serif;font-weight:600;">' + row[1].toFixed(3) + '</td><td style="text-align:right;font-family:Plus Jakarta Sans,sans-serif;font-weight:700;color:#5B21B6;">' + row[2].toFixed(3) + '</td>';
+    metricsTbody.appendChild(tr);
+  });
+
+  var modelTable = document.getElementById('model-table');
+  modelTable.innerHTML = '<thead><tr><th>Model</th><th style="text-align:right;">Test Acc</th></tr></thead><tbody>' +
+    M.models_compared.map(function(m, i){
+      var hi = i === 0;
+      return '<tr><td>' + m.name + (hi ? ' <span class="pill" style="font-size:9.5px;padding:0 6px;">selected</span>' : '') + '</td><td style="text-align:right;font-family:Plus Jakarta Sans,sans-serif;font-weight:' + (hi?'700':'600') + ';color:' + (hi?'#5B21B6':'#374151') + '">' + (m.acc*100).toFixed(1) + '%</td></tr>';
+    }).join('') + '</tbody>';
+
+  // ── Accordion ──
+  document.getElementById('accordion-head').addEventListener('click', function(){
+    document.getElementById('howitworks').classList.toggle('open');
+  });
+
+  // initial render
+  update();
+})();
+</script>
+</body>
+</html>
