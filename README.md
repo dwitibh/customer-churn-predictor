@@ -12,7 +12,7 @@
 
 ---
 
-## TL;DR
+## TLDR
 
 | Metric (100-row holdout) | Value |
 |---|---|
@@ -119,14 +119,16 @@ Each prediction shows:
 - **Top 3 feature drivers** for that specific customer, computed as `wᵢ · (xᵢ − μᵢ) / σᵢ`. Positive contributions push churn up, negative pull it down.
 - **Plain English verdict** tied to the risk band.
 
-Open `index.html` directly in a browser, or visit the [GitHub Pages site](https://dwitibh.github.io/customer-churn-predictor/) to interact with it.
+Use the live app at **[dwitibh.github.io/customer-churn-predictor](https://dwitibh.github.io/customer-churn-predictor/)** to interact with it. Clicking `index.html` here on GitHub only shows the source code.
 
 ---
 
 ## How to run
 
 ### View the live demo
-Just open [`index.html`](index.html) — no install required.
+Visit **[https://dwitibh.github.io/customer-churn-predictor/](https://dwitibh.github.io/customer-churn-predictor/)** to use the predictor in your browser. No install required.
+
+To run it locally instead, click the green **Code** button on this repo, choose **Download ZIP**, unzip, and open `index.html` by double clicking it. Clicking `index.html` inside GitHub will only show you the source code, not the running app.
 
 ### Reproduce the notebook
 ```bash
